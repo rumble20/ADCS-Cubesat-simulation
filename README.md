@@ -1,73 +1,112 @@
-# ADCS CubeSat Project
+# CubeSat ADCS: Estimation and Control
 
-Questo repository contiene un progetto dimostrativo di **Attitude Determination and Control System (ADCS)** per un CubeSat. L'obiettivo è fornire una base didattica e pratica da mostrare a potenziali aziende nei settori **aerospazio e difesa**, evidenziando competenze in modellazione dinamica, controllo e sensor fusion.
-
----
-
-## Contenuti
-- **`adcs_simulation.py`** – Simulazione dinamica di un CubeSat soggetto a coppie esterne, con controllore PD.
-- **`ekf_estimation.py`** – Implementazione di un filtro di Kalman esteso (EKF) per stimare l'assetto da misure rumorose di sensori (giroscopi, magnetometri, sensori solari).
-- **`plots/`** – Grafici dei risultati (angoli di assetto, errori di stima, input di controllo).
-- **`README.md`** – Documentazione completa del progetto, istruzioni e background teorico.
+This repository contains a demonstrator project for an **Attitude Determination and Control System (ADCS)** applied to a CubeSat. The goal is to provide a learning and portfolio project that showcases skills in **dynamics modeling, control, and sensor fusion**, relevant for aerospace and defense applications.
 
 ---
 
-## Requisiti
-- Python 3.9+
-- Librerie: `numpy`, `scipy`, `matplotlib`
+## 📌 Features
+- CubeSat rotational dynamics simulation (Euler’s equations)
+- PD controller for attitude stabilization
+- Simulated sensors: gyroscope, magnetometer, sun sensor
+- Extended Kalman Filter (EKF) for sensor fusion and state estimation
+- Visualization of results: angles, angular velocities, estimation errors
 
-Installazione rapida:
+---
+
+## 🛠 Installation
+Clone the repository:
+```bash
+git clone https://github.com/yourusername/cubesat-adcs.git
+cd cubesat-adcs
+```
+
+Install dependencies (Python 3.9+ recommended):
 ```bash
 pip install numpy scipy matplotlib
 ```
 
 ---
 
-## Esempio di utilizzo
-### 1. Simulazione dinamica e controllo
+## 🚀 Usage
+
+### 1. Dynamics and Control Simulation
 ```bash
 python adcs_simulation.py
 ```
-Genera la dinamica del CubeSat con disturbi esterni e un controllore PD per la stabilizzazione.
+Outputs:
 
-### 2. Stima dell'assetto con EKF
+- Attitude dynamics with external disturbances
+- Stabilization using PD control
+- Plots of true angles vs controlled response
+
+### 2. Attitude Estimation with EKF
 ```bash
 python ekf_estimation.py
 ```
-Applica un EKF per stimare l'assetto a partire da sensori rumorosi.
+Outputs:
+
+- Simulated noisy sensor measurements
+- EKF estimates of angle and angular velocity
+- Comparison plots (true vs estimated states)
 
 ---
 
-## Struttura del progetto
-
-1. **Modello dinamico del CubeSat** – equazioni di Eulero per la dinamica rotazionale.
-2. **Controllo** – legge di controllo PD per stabilizzazione dell'assetto.
-3. **Sensori simulati**:
-   - Giroscopio (con bias e rumore gaussiano)
-   - Magnetometro
-   - Sensore solare (selezione visibilità)
-4. **Filtro di Kalman esteso (EKF)** – fusione dei dati per stimare assetto e velocità angolari.
-
----
-
-## Risultati attesi
-- Stabilizzazione del CubeSat verso un assetto desiderato.
-- Confronto tra assetto reale e stimato.
-- Analisi dell'errore di stima con diversi livelli di rumore.
+## 📂 Repository Structure
+```
+cubesat-adcs/
+│
+├── adcs_simulation.py      # CubeSat dynamics + PD controller
+├── ekf_estimation.py       # EKF-based attitude estimation
+│
+├── plots/                  # Saved figures from simulations
+├── docs/                   # Background notes and references
+└── README.md
+```
 
 ---
 
-## Prossimi sviluppi
-- Implementazione di controllori avanzati (LQR, Sliding Mode).
-- Aggiunta di perturbazioni realistiche (gravità, aerodinamica, radiazione solare).
-- Simulazione completa di missione CubeSat.
+## 📊 Example Results
+
+### PD Control
+- CubeSat stabilizes to target attitude despite disturbances
+- Response plotted as angle vs time
+
+### EKF Estimation
+- EKF successfully tracks true angle and angular velocity
+- Estimation error decreases over time despite sensor noise
 
 ---
 
-## Motivazione del progetto
-Questo progetto dimostra competenze chiave richieste in aziende di **aerospazio e difesa**:
-- Modellazione matematica di sistemi dinamici non lineari.
-- Implementazione di algoritmi di controllo real-time.
-- Tecniche di **sensor fusion** e filtraggio stocastico (EKF).
-- Abilità di documentare e presentare codice in maniera professionale.
+## 🗺 Roadmap
+- Add advanced controllers (LQR, Sliding Mode)
+- Include realistic perturbations (gravity gradient, aero, solar pressure)
+- Full CubeSat mission simulation
 
+---
+
+## 🎯 Motivation
+This project demonstrates practical skills in:
+
+- Nonlinear dynamics modeling
+
+- Real-time control laws
+
+- Sensor fusion with Kalman filtering
+
+- Documentation and reproducibility of simulations
+
+
+It serves as a portfolio project for applications in **aerospace and defense industries**.
+
+---
+
+## 📖 References
+- Markley & Crassidis, *Fundamentals of Spacecraft Attitude Determination and Control*
+- Schaub & Junkins, *Analytical Mechanics of Space Systems*
+- Simon, *Optimal State Estimation*
+
+---
+
+## 📬 Contact
+Created by [Your Name].  
+Feel free to connect via LinkedIn or open an issue for discussion!
