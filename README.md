@@ -4,7 +4,7 @@ This repository contains a demonstrator project for an **Attitude Determination 
 
 ---
 
-## 📌 Features
+## Features
 - CubeSat rotational dynamics simulation (Euler’s equations)
 - PD controller for attitude stabilization
 - Simulated sensors: gyroscope, magnetometer, sun sensor
@@ -13,21 +13,7 @@ This repository contains a demonstrator project for an **Attitude Determination 
 
 ---
 
-## 🛠 Installation
-Clone the repository:
-```bash
-git clone https://github.com/yourusername/cubesat-adcs.git
-cd cubesat-adcs
-```
-
-Install dependencies (Python 3.9+ recommended):
-```bash
-pip install numpy scipy matplotlib
-```
-
----
-
-## 🚀 Usage
+## Usage
 
 ### 1. Dynamics and Control Simulation
 ```bash
@@ -51,7 +37,7 @@ Outputs:
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 ```
 cubesat-adcs/
 │
@@ -65,7 +51,7 @@ cubesat-adcs/
 
 ---
 
-## 📊 Example Results
+## Example Results
 
 ### PD Control
 - CubeSat stabilizes to target attitude despite disturbances
@@ -77,36 +63,28 @@ cubesat-adcs/
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 - Add advanced controllers (LQR, Sliding Mode)
 - Include realistic perturbations (gravity gradient, aero, solar pressure)
 - Full CubeSat mission simulation
 
 ---
 
-## 🎯 Motivation
-This project demonstrates practical skills in:
-
-- Nonlinear dynamics modeling
-
-- Real-time control laws
-
-- Sensor fusion with Kalman filtering
-
-- Documentation and reproducibility of simulations
+## Goals
+With this personal project I try to demonstrate practical skills in **nonlinear dynamics modeling**, **real-time control laws**, **sensor fusion with Kalman filtering**, **documentation and reproducibility of simulations**.
 
 
 It serves as a portfolio project for applications in **aerospace and defense industries**.
 
 ---
 
-## 📖 References
+## References
 - Markley & Crassidis, *Fundamentals of Spacecraft Attitude Determination and Control*
 - Schaub & Junkins, *Analytical Mechanics of Space Systems*
 - Simon, *Optimal State Estimation*
 
 ---
 
-## 📬 Contact
-Created by [Your Name].  
+## Contact
+Created by Riccardo Legnini.  
 Feel free to connect via LinkedIn or open an issue for discussion!
