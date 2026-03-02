@@ -2,6 +2,8 @@
 
 This repository contains a demonstrator project for an **Attitude Determination and Control System (ADCS)** applied to a CubeSat. The goal is to provide a learning and portfolio project that showcases skills in **dynamics modeling, control, and sensor fusion**, relevant for aerospace and defense applications.
 
+*This project has not been updated in a long time and latest updates are still to be validated and pushed*
+
 ---
 
 ## Features
