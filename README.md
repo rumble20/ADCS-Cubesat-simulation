@@ -62,11 +62,15 @@ Install dependencies numpy and matplotlib
 
 Run the control simulation:
 
+'''bash
 python adcs_simulation.py
+'''
 
 Run the estimation simulation:
 
+'''bash
 python ekf_estimation.py
+'''
 
 Both scripts save figures into the plots/ directory.
 
