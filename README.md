@@ -56,21 +56,22 @@ cubesat-aocs/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+```
 
 ## Quick start
 Install dependencies numpy and matplotlib
 
 Run the control simulation:
 
-'''bash
+```bash
 python adcs_simulation.py
-'''
+```
 
 Run the estimation simulation:
 
-'''bash
+```bash
 python ekf_estimation.py
-'''
+```
 
 Both scripts save figures into the plots/ directory.
 

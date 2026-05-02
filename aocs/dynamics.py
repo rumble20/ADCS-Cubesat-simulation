@@ -76,9 +76,7 @@ def step_rigid_body(
 
 def disturbance_torque(time_s: float) -> np.ndarray:
     """Return a small deterministic disturbance torque.
-
-    This is not a high-fidelity environmental model. It is only meant
-    to keep the simulation from being unrealistically ideal.
+    This is only meant to keep the simulation from being unrealistically ideal.
     """
     return np.array(
         [

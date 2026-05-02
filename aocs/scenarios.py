@@ -24,7 +24,7 @@ def _ensure_output_dir(path: Path) -> None:
 def run_control_demo(save_path: str | Path, show: bool = False) -> dict:
     """Run the closed-loop attitude regulation demonstration."""
     params = SpacecraftParams()
-    gains = ControlGains(kp=0.08, kd=0.12, max_torque=2.0e-3)
+    gains = ControlGains()
 
     dt = 0.1
     t_final = 240.0
