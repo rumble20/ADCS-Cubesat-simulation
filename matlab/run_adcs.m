@@ -63,7 +63,7 @@ for k = 1:n
 end
 
 % --- requirements ---
-check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err);
+check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err, p);
 
 % --- plots ---
 % save next to the python plots in the repo root, not inside matlab/

@@ -1,4 +1,4 @@
-function all_ok = check_requirements(t, err_deg, w_norm, h_abs, sun_err, mag_err)
+function all_ok = check_requirements(t, err_deg, w_norm, h_abs, sun_err, mag_err, p)
 % Compares the simulation results against docs/requirements.md
 % Only looks at t >= 60 s for the pointing and rate requirements.
 
@@ -6,7 +6,7 @@ after = t >= 60;
 
 r1 = max(err_deg(after));                 % deg
 r2 = max(w_norm(after));                  % rad/s
-r3 = max(h_abs) / 5e-3 * 100;             % % of wheel capacity (5e-3 = h_max)
+r3 = max(h_abs) / p.h_max * 100;          % % of wheel capacity
 r4 = sqrt(mean(sun_err.^2));              % deg
 r5 = sqrt(mean(mag_err.^2));              % deg
 
