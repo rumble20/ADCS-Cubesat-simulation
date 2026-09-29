@@ -26,10 +26,10 @@ mag_err  = zeros(1,n);
 triad_err = nan(1,n);
 est_err  = nan(3,n);    % attitude estimation error [deg], per axis
 est_sig  = nan(3,n);    % 1-sigma from the filter [deg]
-bias_err = nan(3,n);
+bias_err = nan(3,n);    % bias estimation error [rad/s]
 ecl_log  = false(1,n);
 started  = false;         % becomes true when the MEKF has been started
-t_start  = NaN;    % bias estimation error [rad/s]
+t_start  = NaN;
 
 for k = 1:n
     % --- orbit and environment ---
@@ -49,8 +49,10 @@ for k = 1:n
 
     % --- attitude estimation (MEKF) ---
     if ~started
-        if ~dark
-            % start the filter from TRIAD (sun as primary vector), bias unknown
+        % start the filter from TRIAD (sun as primary vector), bias unknown.
+        % TRIAD is bad when the two vectors are almost parallel (I saw 11.7 deg
+        % error when they were 11 deg apart), so wait until they are 20 deg apart
+        if ~dark && acosd(abs(p.r_sun' * p.r_mag)) > 20
             q_est = triad(sun, mag, p.r_sun, p.r_mag);
             b_est = zeros(3,1);
             P = blkdiag(p.P0_att*eye(3), p.P0_bias*eye(3));
@@ -68,7 +70,7 @@ for k = 1:n
 
     % --- control (uses the ESTIMATED attitude and rate) ---
     if ~started
-        % no attitude yet (starting in eclipse): only damp the rates
+        % no attitude yet (eclipse or bad TRIAD geometry): only damp the rates
         tau_cmd = -p.Kd * gyro;
         qe_est = [1; 0; 0; 0];
     else
