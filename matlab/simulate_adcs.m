@@ -34,7 +34,6 @@ t_start  = NaN;
 for k = 1:n
     % --- orbit and environment ---
     r_pos = orbit_position(t(k), p);
-    p.r_sun = sun_vector_eci(t(k), p);
     p.r_mag = mag_field_eci(r_pos, t(k), p);
     dark = in_eclipse(r_pos, p.r_sun, p);
     ecl_log(k) = dark;

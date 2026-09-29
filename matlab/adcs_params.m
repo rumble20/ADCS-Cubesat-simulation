@@ -32,10 +32,14 @@ p.mu      = 3.986004418e14;           % [m^3/s^2]
 p.w_earth = 7.2921159e-5;             % Earth rotation [rad/s]
 p.alt     = 500e3;                    % [m]
 p.inc     = 97.4 * pi/180;            % [rad]
-p.raan    = 186 * pi/180;             % about the sun right ascension at the epoch,
-                                      % so the orbit goes through the shadow
+p.raan    = 186 * pi/180;             % chosen so the orbit goes through the Earth shadow
 p.u0      = 0;                        % starting point on the orbit [rad]
-p.days_j2000 = 9768;                  % epoch: 29 Sep 2026, in days since J2000
+
+% sun direction in the inertial frame. It moves about 1 deg per day, so over
+% one orbit I just keep it fixed. Value for 29 Sep 2026, from a sun position
+% formula I tried once (see NOTES.md).
+s = [-0.994; -0.102; -0.044];
+p.r_sun = s / norm(s);
 
 % sensor noise (1 sigma)
 p.sig_sun  = 0.005;                   % per component, unit vector [-]
@@ -47,7 +51,6 @@ p.bias0    = [0.002; -0.0015; 0.001]; % initial gyro bias [rad/s]
 % estimator (MEKF)
 p.P0_att  = (5*pi/180)^2;              % initial attitude error variance [rad^2]
 p.P0_bias = (0.005)^2;                 % initial bias error variance [(rad/s)^2]
-p.Q_scale = 1;                        % multiply process noise (tuning knob)
 
 % disturbance torque amplitudes [N m]
 p.dist_amp = [1.5e-5; 2.0e-5; 1.0e-5];
