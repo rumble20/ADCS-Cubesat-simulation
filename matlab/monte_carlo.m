@@ -2,7 +2,7 @@
 % Runs simulate_adcs many times with random initial conditions and noise,
 % then checks how many runs meet the requirements and whether the MEKF
 % 3-sigma bounds are believable.
-% Takes a while (about 10 s per run in Octave on my laptop, faster in MATLAB).
+% Takes a while (about 7 s per run in Octave, should be faster in MATLAB).
 
 clear; clc; close all;
 
