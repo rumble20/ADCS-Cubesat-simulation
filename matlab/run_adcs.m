@@ -26,6 +26,7 @@ tau_log  = zeros(3,n);
 gyro_err = zeros(3,n);
 sun_err  = zeros(1,n);
 mag_err  = zeros(1,n);
+triad_err = zeros(1,n);
 
 for k = 1:n
     % --- control ---
@@ -41,6 +42,9 @@ for k = 1:n
     mag = magnetometer(q, p);
     [gyro, bias] = gyro_model(w, bias, p);
 
+    % --- attitude determination (TRIAD, sun as primary vector) ---
+    q_triad = triad(sun, mag, p.r_sun, p.r_mag);
+
     % --- logging ---
     err_deg(k)    = 2 * acosd(min(1, qe(1)));
     w_log(:,k)    = w;
@@ -49,6 +53,8 @@ for k = 1:n
     gyro_err(:,k) = gyro - w;
     sun_err(k)    = acosd(min(1, sun' * (A * p.r_sun)));
     mag_err(k)    = acosd(min(1, mag' * (A * p.r_mag)));
+    qe_t = quat_error(q, q_triad);
+    triad_err(k)  = 2 * acosd(min(1, qe_t(1)));
 
     % --- dynamics (Euler for the rate, midpoint rate for the quaternion) ---
     tau_dist = disturbance_torque(t(k), p);
@@ -61,6 +67,8 @@ for k = 1:n
     w = w_next;
     h = h_next;
 end
+
+fprintf('TRIAD attitude error: RMS %.3f deg, max %.3f deg\n', sqrt(mean(triad_err.^2)), max(triad_err));
 
 % --- requirements ---
 check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err, p);
@@ -83,10 +91,10 @@ plot([t(1) t(end)], [-p.h_max -p.h_max], 'k--'); grid on;
 ylabel('Wheel momentum [N m s]'); xlabel('Time [s]'); legend('x','y','z');
 saveas(gcf, '../plots/matlab_control.png');
 
-figure('Position',[100 100 800 700]);
-subplot(3,1,1); plot(t, sun_err); grid on; ylabel('Sun sensor error [deg]');
+figure('Position',[100 100 800 900]);
+subplot(4,1,1); plot(t, sun_err); grid on; ylabel('Sun sensor error [deg]');
 title('Simulated sensor errors');
-subplot(3,1,2); plot(t, mag_err); grid on; ylabel('Magnetometer error [deg]');
-subplot(3,1,3); plot(t, gyro_err'); grid on; ylabel('Gyro error [rad/s]');
-xlabel('Time [s]'); legend('x','y','z');
+subplot(4,1,2); plot(t, mag_err); grid on; ylabel('Magnetometer error [deg]');
+subplot(4,1,3); plot(t, gyro_err'); grid on; ylabel('Gyro error [rad/s]'); legend('x','y','z');
+subplot(4,1,4); plot(t, triad_err); grid on; ylabel('TRIAD error [deg]'); xlabel('Time [s]');
 saveas(gcf, '../plots/matlab_sensors.png');
