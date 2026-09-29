@@ -68,26 +68,20 @@ for k = 1:n
     gyro_prev = gyro;
 
     % --- control (uses the ESTIMATED attitude and rate) ---
-    if ~started
-        % no attitude yet (eclipse or bad TRIAD geometry): only damp the rates
-        tau_cmd = -p.Kd * gyro;
-        qe_est = [1; 0; 0; 0];
-    else
+    if started
         qe_est = quat_error(p.q_ref, q_est);
-    end
-    w_est = gyro;
-    if started
         w_est = gyro - b_est;
-    end
-    % PD written as "track a commanded rate". The commanded rate is capped at
-    % p.w_max, otherwise big slews spin up the wheels too much (see NOTES.md).
-    % For small errors this is exactly the same as tau = -Kp*qv - Kd*w.
-    if started
+        % PD written as "track a commanded rate". The commanded rate is capped at
+        % p.w_max, otherwise big slews spin up the wheels too much (see NOTES.md).
+        % For small errors this is exactly the same as tau = -Kp*qv - Kd*w.
         w_cmd = -(p.Kp / p.Kd) * qe_est(2:4);
         if norm(w_cmd) > p.w_max
             w_cmd = w_cmd / norm(w_cmd) * p.w_max;
         end
         tau_cmd = -p.Kd * (w_est - w_cmd);
+    else
+        % no attitude yet (eclipse or bad TRIAD geometry): only damp the rates
+        tau_cmd = -p.Kd * gyro;
     end
 
     % --- actuator ---
