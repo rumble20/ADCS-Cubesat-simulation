@@ -1,7 +1,7 @@
 # Notes
 
 Log of what went wrong, what surprised me and what I decided. Newest at the bottom.
-Everything was run in GNU Octave 8.4 (I don't have the MATLAB results yet).
+Everything up to "First run in real MATLAB" was run in GNU Octave 8.4.
 
 ## Setup
 - The docs described a modular repo with a 3-axis EKF and TRIAD, but the code
@@ -99,7 +99,16 @@ Everything was run in GNU Octave 8.4 (I don't have the MATLAB results yet).
   three runs with small differences. In the dark the error just wanders.
   The bias error also peaks in eclipse (8.6e-4), in sunlight it stays under 3e-4.
 
+## First run in real MATLAB (R2024b)
+- `test_quaternions` passed and `run_adcs` gave Overall: PASS, no code changes
+  needed. One orbit takes about 40 s.
+- Numbers are not the same as in Octave. MATLAB and Octave have different
+  random generators, so `rng(1)` gives different noise. Sunlit numbers are
+  close (pointing 0.47 deg, knowledge 0.35 deg), but the eclipse drift was
+  9.4 deg this time. Same thing as before: in the dark it just wanders.
+- The "MEKF RMS 2.58 deg" printed at the start is misleading because it
+  includes the eclipse. The sunlit max (0.35 deg) is the useful number.
+
 ## Still to do
 - Rerun the Monte Carlo now that the orbit is in (it still uses 300 s runs).
-- Run everything in real MATLAB.
 - Simulink version of the loop.
