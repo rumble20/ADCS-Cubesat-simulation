@@ -17,10 +17,12 @@ if ~exist('adcs_model.slx', 'file')
 end
 out = sim('adcs_model');
 
+% the signals are column vectors, so To Workspace saves them as 4x1xN,
+% squeeze + transpose gives one row per time step
 t_sl = out.tout;
-q_sl = out.q_sl;    % one row per time step
-w_sl = out.w_sl;
-h_sl = out.h_sl;
+q_sl = squeeze(out.q_sl)';
+w_sl = squeeze(out.w_sl)';
+h_sl = squeeze(out.h_sl)';
 
 n = length(t_sl);
 err_sl = zeros(n,1);
