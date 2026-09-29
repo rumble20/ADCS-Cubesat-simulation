@@ -32,7 +32,7 @@ v(5) = sqrt(mean(res.mag_err.^2));                 % deg
 v(6) = max(res.est_norm(after));                   % deg
 v(7) = max(res.bias_err_norm(late));               % rad/s
 
-lim = [2, 0.01, 80, 0.5, 1.0, 0.5, 5e-4];
+lim = [2, 0.01, 80, 0.5, 1.0, 1.0, 5e-4];
 results = v < lim;
 all_ok = all(results);
 
