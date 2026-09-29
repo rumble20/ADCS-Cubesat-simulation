@@ -8,6 +8,7 @@ clear; clc; close all;
 
 n_runs = 50;
 base = adcs_params();
+base.t_final = 300;   % short runs, a full orbit x 50 takes too long
 
 pass = false(n_runs, 7);
 all_err = cell(n_runs,1);   % attitude estimation error, per run
