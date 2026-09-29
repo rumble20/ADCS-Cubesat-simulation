@@ -5,6 +5,7 @@ function [all_ok, results] = check_requirements(res, p, verbose)
 % the sun and has seen the sun for at least 60 s (at the start and after
 % every eclipse). In eclipse only the magnetometer works and the attitude
 % drifts, so those numbers are printed separately just to look at.
+% The bias check (REQ-07) uses the same rule, after 120 s.
 % Set verbose = false to skip printing (used by the Monte Carlo).
 
 if nargin < 3
@@ -21,7 +22,7 @@ for k = 2:length(res.t)
     end
 end
 after = sun_time >= 60 & ~res.eclipse;
-late  = res.t >= 120;
+late  = res.t >= 120 & after;   % bias also only in sunlight (in eclipse it wanders)
 
 v(1) = max(res.err_deg(after));                    % deg
 v(2) = max(res.w_norm(after));                     % rad/s
@@ -42,7 +43,7 @@ end
 
 names = {'Pointing error (sunlit)', 'Body rate (sunlit)', 'Peak wheel momentum', ...
          'Sun sensor error (RMS)', 'Magnetometer error (RMS)', ...
-         'Attitude knowledge (sunlit)', 'Bias estimate error after 120 s'};
+         'Attitude knowledge (sunlit)', 'Bias estimate error (sunlit)'};
 units = {'deg', 'rad/s', '% cap', 'deg', 'deg', 'deg', 'rad/s'};
 
 fprintf('\n---- Requirements check ----\n');

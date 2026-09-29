@@ -15,7 +15,7 @@ prints PASS/FAIL.
 | REQ-04 | Sun sensor error (RMS) | < 0.5 deg | whole run (sunlit samples) |
 | REQ-05 | Magnetometer error (RMS) | < 1 deg | whole run |
 | REQ-06 | Attitude knowledge error (MEKF) | < 1 deg | in sunlight, 60 s after the sun is visible |
-| REQ-07 | Gyro bias estimate error | < 5e-4 rad/s | after 120 s |
+| REQ-07 | Gyro bias estimate error | < 5e-4 rad/s | in sunlight, after 120 s |
 
 ## Why "in sunlight"
 In eclipse the sun sensor sees nothing and only the magnetometer is left.
