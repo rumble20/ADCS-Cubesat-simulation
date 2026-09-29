@@ -117,7 +117,7 @@ for k = 1:n
     end
 
     % --- dynamics (Euler for the rate, midpoint rate for the quaternion) ---
-    tau_dist = disturbance_torque(t(k), p) + gravity_gradient(q, r_pos, p);
+    tau_dist = disturbance_torque(t(k), p);
     w_dot = p.I \ ( -cross(w, p.I*w + h) + tau_body + tau_dist );
     w_next = w + p.dt * w_dot;
     w_mid = 0.5 * (w + w_next);
