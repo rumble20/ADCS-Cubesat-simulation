@@ -18,7 +18,6 @@ F = [ eye(3) - skew(w_est)*p.dt,  -eye(3)*p.dt;
 % process noise: gyro white noise drives dtheta, bias random walk drives dbias
 Q = [ (p.sig_gyro^2 * p.dt) * eye(3),   zeros(3);
       zeros(3),                        (p.bias_rw^2 * p.dt) * eye(3) ];
-Q = Q * p.Q_scale;
 
 P = F*P*F' + Q;
 end
