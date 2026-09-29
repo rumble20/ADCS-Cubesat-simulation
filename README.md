@@ -21,7 +21,6 @@ tests/               quick checks for the quaternion functions and TRIAD
 docs/requirements.md what the simulation should achieve
 docs/assumptions.md  what is simplified
 docs/code_guide.md   how the code works and in which order to read it
-python_reference/    Python copy of the early wheel + sensor version (used to cross-check)
 adcs_simulation.py   first Python version (control only)
 ekf_estimation.py    first Python version (1-axis EKF)
 NOTES.md             bugs, surprises, decisions

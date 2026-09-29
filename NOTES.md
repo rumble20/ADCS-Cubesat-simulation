@@ -108,6 +108,9 @@ Everything up to "First run in real MATLAB" was run in GNU Octave 8.4.
   9.4 deg this time. Same thing as before: in the dark it just wanders.
 - The "MEKF RMS 2.58 deg" printed at the start is misleading because it
   includes the eclipse. The sunlit max (0.35 deg) is the useful number.
+- Deleted `python_reference/`. It was a Python copy of the early MATLAB
+  version, only there to check the MATLAB code while I couldn't run it. It
+  still had the old gains and fixed vectors, so now it was just confusing.
 
 ## Still to do
 - Rerun the Monte Carlo now that the orbit is in (it still uses 300 s runs).
