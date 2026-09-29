@@ -1,54 +1,53 @@
-# CubeSat AOCS Mini Project
+# CubeSat ADCS simulation (side project)
 
-A side project where I try to build up a small attitude determination and control (ADCS)
-simulation for a CubeSat, one piece at a time. I am learning as I go, so expect simplifications
-and a few rough edges. See `NOTES.md` for what went wrong along the way.
+A small attitude determination and control simulation for a CubeSat that I
+build up step by step to learn the basics of ADCS. It is a personal learning
+project, not flight software, and it is written in plain MATLAB functions so
+every part is easy to follow. `NOTES.md` is the log of what went wrong and
+what I changed along the way.
 
-## What is in here
+## What it simulates
+- A 3U-size CubeSat in a 500 km circular orbit, going through eclipse
+- Three reaction wheels with torque and momentum limits
+- Sun sensor, magnetometer and gyro (with noise and a drifting bias)
+- TRIAD to get a first attitude, then a MEKF that estimates attitude and gyro bias
+- A PD controller that points the satellite using only the estimated attitude
+- A requirements check (PASS/FAIL) and a 50-run Monte Carlo
 
+## Repository
 ```text
-.
-├── adcs_simulation.py       first Python version: 3-axis quaternion PD control
-├── ekf_estimation.py        first Python version: 1-axis EKF with gyro bias
-├── matlab/                  MATLAB version: wheels, sensors, requirements check
-├── python_reference/        Python cross-check of the MATLAB model
-├── docs/                    requirements, assumptions, design notes
-├── NOTES.md                 bugs, surprises, decisions
-└── plots/
+matlab/              the simulation (start from run_adcs.m)
+tests/               quick checks for the quaternion functions and TRIAD
+docs/requirements.md what the simulation should achieve
+docs/assumptions.md  what is simplified
+docs/code_guide.md   how the code works and in which order to read it
+python_reference/    Python copy of the early wheel + sensor version (used to cross-check)
+adcs_simulation.py   first Python version (control only)
+ekf_estimation.py    first Python version (1-axis EKF)
+NOTES.md             bugs, surprises, decisions
 ```
-
-## Current status
-- [x] Requirements defined and checked automatically (`docs/requirements.md`)
-- [x] Reaction wheels with torque and momentum limits
-- [x] Sun sensor, magnetometer, gyro (noise + bias random walk)
-- [ ] TRIAD + 3-axis error-state EKF
-- [ ] Monte Carlo runs
-- [ ] Simple orbit (moving reference vectors, eclipse)
-- [ ] Simulink model
 
 ## How to run
-
-MATLAB:
+In MATLAB (also works in GNU Octave):
 ```matlab
 cd matlab
-run_adcs
+run_adcs        % one orbit (~95 min simulated), prints the requirements check
+monte_carlo     % 50 short runs with random start conditions, takes a few minutes
 ```
-It prints a PASS/FAIL table for each requirement and saves plots in `plots/`.
+Plots are saved in `plots/`.
 
-Python (original scripts and cross-check):
-```bash
-python adcs_simulation.py
-python ekf_estimation.py
-python python_reference/adcs_wheels_sensors.py
+Tests:
+```matlab
+cd tests
+test_quaternions
 ```
 
-## Main simplifications
-- Attitude only, no orbit propagation
-- Ideal wheels (no friction, no motor dynamics), no momentum dumping
-- Controller uses the true state for now, sensors are only simulated and logged
-- Fixed reference vectors for sun and magnetic field
-- Disturbance torques are simple sinusoids
-
-## What I am trying to learn
-Rigid-body dynamics, quaternions, PD control, reaction wheels, sensor modelling,
-requirements-driven testing, and (next) attitude determination with an EKF.
+## Status
+- [x] Requirements and PASS/FAIL check
+- [x] Reaction wheels
+- [x] Sensors
+- [x] TRIAD + MEKF with gyro bias
+- [x] Monte Carlo
+- [x] Circular orbit, field direction, eclipse
+- [ ] Simulink version
+- [ ] Monte Carlo with the orbit (only run before the orbit was added)

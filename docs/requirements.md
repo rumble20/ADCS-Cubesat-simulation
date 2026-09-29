@@ -1,24 +1,27 @@
 # Requirements
 
-These are my own requirements for the simulation, chosen to be realistic for a small
-CubeSat doing simple nadir-style pointing. I picked the numbers by reading about typical
-CubeSat pointing accuracy, so they are reasonable guesses, not a real mission spec.
-`matlab/check_requirements.m` checks them at the end of every run.
+My own requirements for the simulation. I picked the numbers from what I read
+about typical CubeSats and then adjusted a couple of them after running the
+simulation (the reasons are in NOTES.md). They are not from a real mission.
 
-| ID | Requirement | Limit | Notes |
-|----|-------------|-------|-------|
-| REQ-01 | Pointing error after t = 60 s | < 2 deg | worst value for all t >= 60 s |
-| REQ-02 | Body angular rate after t = 60 s | < 0.01 rad/s | norm of the rate vector |
-| REQ-03 | Peak reaction wheel momentum | < 80 % of capacity | keeps margin before saturation |
-| REQ-04 | Sun sensor error (RMS) | < 0.5 deg | angle between measured and true sun vector |
-| REQ-05 | Magnetometer error (RMS) | < 1.0 deg | angle between measured and true field vector |
+`matlab/check_requirements.m` checks all of them at the end of every run and
+prints PASS/FAIL.
 
-## Conditions
-- Initial error is about 60 deg with a small initial rate (see `adcs_params.m`).
-- Sinusoidal disturbance torques of about 1e-5 to 2e-5 N m.
-- Wheels: 1 mN m torque and 5 mN m s momentum per axis.
+| ID | What | Limit | When it is checked |
+|----|------|-------|--------------------|
+| REQ-01 | Pointing error | < 2 deg | in sunlight, 60 s after the sun is visible |
+| REQ-02 | Body angular rate | < 0.01 rad/s | in sunlight, 60 s after the sun is visible |
+| REQ-03 | Peak wheel momentum | < 80 % of max | whole run |
+| REQ-04 | Sun sensor error (RMS) | < 0.5 deg | whole run (sunlit samples) |
+| REQ-05 | Magnetometer error (RMS) | < 1 deg | whole run |
+| REQ-06 | Attitude knowledge error (MEKF) | < 1 deg | in sunlight, 60 s after the sun is visible |
+| REQ-07 | Gyro bias estimate error | < 5e-4 rad/s | after 120 s |
 
-## Not covered yet
-- Estimation accuracy (needs the attitude estimator).
-- Power, thermal, orbit, eclipse.
-- Momentum dumping.
+## Why "in sunlight"
+In eclipse the sun sensor sees nothing and only the magnetometer is left.
+One vector is not enough to know the full attitude, so the attitude drifts
+by a few degrees until the sun comes back. I did not try to fix that, I just
+check the requirements in sunlight and print the eclipse numbers for info.
+
+## Not covered
+Power, thermal, momentum dumping, anything about a real mission.
