@@ -107,7 +107,7 @@ Everything up to "First run in real MATLAB" was run in GNU Octave 8.4.
   close (pointing 0.47 deg, knowledge 0.35 deg), but the eclipse drift was
   9.4 deg this time. Same thing as before: in the dark it just wanders.
 - The "MEKF RMS 2.58 deg" printed at the start is misleading because it
-  includes the eclipse. The sunlit max (0.35 deg) is the useful number.
+  includes the eclipse. Changed it to print the RMS in sunlight only (0.10 deg).
 - Deleted `python_reference/`. It was a Python copy of the early MATLAB
   version, only there to check the MATLAB code while I couldn't run it. It
   still had the old gains and fixed vectors, so now it was just confusing.
