@@ -27,6 +27,9 @@ gyro_err = zeros(3,n);
 sun_err  = zeros(1,n);
 mag_err  = zeros(1,n);
 triad_err = zeros(1,n);
+est_err  = zeros(3,n);    % attitude estimation error [deg], per axis
+est_sig  = zeros(3,n);    % 1-sigma from the filter [deg]
+bias_err = zeros(3,n);    % bias estimation error [rad/s]
 
 for k = 1:n
     % --- control ---
@@ -45,6 +48,19 @@ for k = 1:n
     % --- attitude determination (TRIAD, sun as primary vector) ---
     q_triad = triad(sun, mag, p.r_sun, p.r_mag);
 
+    % --- attitude estimation (MEKF) ---
+    if k == 1
+        % start the filter from TRIAD, bias unknown
+        q_est = q_triad;
+        b_est = zeros(3,1);
+        P = blkdiag(p.P0_att*eye(3), p.P0_bias*eye(3));
+    else
+        [q_est, P] = mekf_predict(q_est, b_est, P, gyro_prev, p);
+        [q_est, b_est, P] = mekf_update(q_est, b_est, P, sun, p.r_sun, p.sig_sun);
+        [q_est, b_est, P] = mekf_update(q_est, b_est, P, mag, p.r_mag, p.sig_mag);
+    end
+    gyro_prev = gyro;
+
     % --- logging ---
     err_deg(k)    = 2 * acosd(min(1, qe(1)));
     w_log(:,k)    = w;
@@ -55,6 +71,10 @@ for k = 1:n
     mag_err(k)    = acosd(min(1, mag' * (A * p.r_mag)));
     qe_t = quat_error(q, q_triad);
     triad_err(k)  = 2 * acosd(min(1, qe_t(1)));
+    dq_est = quat_error(q_est, q);          % true = est * dq
+    est_err(:,k)  = 2 * dq_est(2:4) * 180/pi;
+    est_sig(:,k)  = sqrt(diag(P(1:3,1:3))) * 180/pi;
+    bias_err(:,k) = bias - b_est;
 
     % --- dynamics (Euler for the rate, midpoint rate for the quaternion) ---
     tau_dist = disturbance_torque(t(k), p);
@@ -69,6 +89,12 @@ for k = 1:n
 end
 
 fprintf('TRIAD attitude error: RMS %.3f deg, max %.3f deg\n', sqrt(mean(triad_err.^2)), max(triad_err));
+
+est_norm = sqrt(sum(est_err.^2,1));
+fprintf('MEKF attitude error: RMS %.3f deg, max after 60 s %.3f deg\n', sqrt(mean(est_norm.^2)), max(est_norm(t>=60)));
+fprintf('Final bias error: %s rad/s\n', mat2str(bias_err(:,end)', 3));
+inside = mean(abs(est_err(:)) < 3*est_sig(:)) * 100;
+fprintf('Samples inside 3-sigma: %.1f %%\n', inside);
 
 % --- requirements ---
 check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err, p);
@@ -98,3 +124,16 @@ subplot(4,1,2); plot(t, mag_err); grid on; ylabel('Magnetometer error [deg]');
 subplot(4,1,3); plot(t, gyro_err'); grid on; ylabel('Gyro error [rad/s]'); legend('x','y','z');
 subplot(4,1,4); plot(t, triad_err); grid on; ylabel('TRIAD error [deg]'); xlabel('Time [s]');
 saveas(gcf, '../plots/matlab_sensors.png');
+
+figure('Position',[100 100 800 900]);
+lbl = {'x','y','z'};
+for i = 1:3
+    subplot(4,1,i); plot(t, est_err(i,:)); hold on;
+    plot(t, 3*est_sig(i,:), 'r--'); plot(t, -3*est_sig(i,:), 'r--'); grid on;
+    ylim([-1 1]);   % the first seconds have a huge sigma and hide everything else
+    ylabel(['err ' lbl{i} ' [deg]']);
+    if i == 1; title('MEKF attitude error with 3-sigma bounds'); end
+end
+subplot(4,1,4); plot(t, bias_err'); grid on;
+ylabel('Bias error [rad/s]'); xlabel('Time [s]'); legend('x','y','z');
+saveas(gcf, '../plots/matlab_mekf.png');
