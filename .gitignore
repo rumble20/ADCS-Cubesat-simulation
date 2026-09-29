@@ -215,3 +215,8 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+
+# MATLAB / Simulink build files
+*.asv
+*.slxc
+slprj/
