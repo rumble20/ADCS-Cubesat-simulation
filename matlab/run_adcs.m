@@ -101,7 +101,15 @@ inside = mean(abs(est_err(:)) < 3*est_sig(:)) * 100;
 fprintf('Samples inside 3-sigma: %.1f %%\n', inside);
 
 % --- requirements ---
-check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err, p);
+res.t        = t;
+res.err_deg  = err_deg;
+res.w_norm   = sqrt(sum(w_log.^2,1));
+res.h_abs    = max(abs(h_log),[],1);
+res.sun_err  = sun_err;
+res.mag_err  = mag_err;
+res.est_norm = est_norm;
+res.bias_err_norm = sqrt(sum(bias_err.^2,1));
+check_requirements(res, p);
 
 % --- plots ---
 % save next to the python plots in the repo root, not inside matlab/
