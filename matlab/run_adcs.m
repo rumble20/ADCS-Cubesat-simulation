@@ -2,8 +2,8 @@
 % CubeSat attitude control with reaction wheels + simulated sensors.
 % Run this file. Needs the other .m files in this folder.
 %
-% NOTE: the controller still uses the TRUE attitude and rate.
-% The sensors are only logged for now, the estimator comes later.
+% Loop: sensors -> TRIAD (init) -> MEKF -> PD controller -> wheels -> dynamics
+% The controller only sees the estimated state, not the true one.
 
 clear; clc; close all;
 p = adcs_params();
@@ -32,13 +32,6 @@ est_sig  = zeros(3,n);    % 1-sigma from the filter [deg]
 bias_err = zeros(3,n);    % bias estimation error [rad/s]
 
 for k = 1:n
-    % --- control ---
-    qe = quat_error(p.q_ref, q);
-    tau_cmd = -p.Kp * qe(2:4) - p.Kd * w;
-
-    % --- actuator ---
-    [tau_body, h_next] = reaction_wheels(tau_cmd, h, p);
-
     % --- sensors (using the true state at this step) ---
     A = quat_to_dcm(q);
     sun = sun_sensor(q, p);
@@ -60,6 +53,17 @@ for k = 1:n
         [q_est, b_est, P] = mekf_update(q_est, b_est, P, mag, p.r_mag, p.sig_mag);
     end
     gyro_prev = gyro;
+
+    % --- control (uses the ESTIMATED attitude and rate now) ---
+    qe_est = quat_error(p.q_ref, q_est);
+    w_est  = gyro - b_est;
+    tau_cmd = -p.Kp * qe_est(2:4) - p.Kd * w_est;
+
+    % --- actuator ---
+    [tau_body, h_next] = reaction_wheels(tau_cmd, h, p);
+
+    % true pointing error, for logging and requirements
+    qe = quat_error(p.q_ref, q);
 
     % --- logging ---
     err_deg(k)    = 2 * acosd(min(1, qe(1)));
