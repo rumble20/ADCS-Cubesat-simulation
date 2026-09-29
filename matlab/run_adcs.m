@@ -76,7 +76,9 @@ ylabel('Rate [rad/s]'); legend('wx','wy','wz');
 subplot(4,1,3); plot(t, tau_log'); grid on;
 ylabel('Torque on body [N m]'); legend('x','y','z');
 subplot(4,1,4); plot(t, h_log'); hold on;
-yline(p.h_max,'--'); yline(-p.h_max,'--'); grid on;
+% yline does not exist in Octave, so draw the limits by hand
+plot([t(1) t(end)], [p.h_max p.h_max], 'k--');
+plot([t(1) t(end)], [-p.h_max -p.h_max], 'k--'); grid on;
 ylabel('Wheel momentum [N m s]'); xlabel('Time [s]'); legend('x','y','z');
 saveas(gcf, 'plots/matlab_control.png');
 
