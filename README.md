@@ -1,111 +1,54 @@
 # CubeSat AOCS Mini Project
 
-This repository contains a small side project built to explore some basic Attitude and Orbit Control System concepts for a CubeSat-type spacecraft.
+A side project where I try to build up a small attitude determination and control (ADCS)
+simulation for a CubeSat, one piece at a time. I am learning as I go, so expect simplifications
+and a few rough edges. See `NOTES.md` for what went wrong along the way.
 
-The project is intentionally compact. Instead of trying to build a full software framework, I kept it as two standalone Python scripts:
-
-- one for attitude dynamics and control
-- one for attitude estimation with an Extended Kalman Filter
-
-The goal is not to present flight-ready software, but to show practical interest in AOCS and a working understanding of some of the main ideas: rigid-body dynamics, quaternion-based control, noisy measurements, and state estimation.
-
-## Project contents
+## What is in here
 
 ```text
 .
-├── adcs_simulation.py
-├── ekf_estimation.py
-├── README.md
-├── requirements.txt
-├── plots/
-└── docs/
+├── adcs_simulation.py       first Python version: 3-axis quaternion PD control
+├── ekf_estimation.py        first Python version: 1-axis EKF with gyro bias
+├── matlab/                  MATLAB version: wheels, sensors, requirements check
+├── python_reference/        Python cross-check of the MATLAB model
+├── docs/                    requirements, assumptions, design notes
+├── NOTES.md                 bugs, surprises, decisions
+└── plots/
 ```
 
-## What each script does
-### adcs_simulation.py
-
-This script simulates a simple 3-axis CubeSat attitude control problem.
-
-It includes:
-- rigid-body rotational dynamics
-- quaternion attitude propagation
-- quaternion PD control
-- small disturbance torques
-- plots of:
-  - attitude error
-  - angular velocity
-  - control torque
-  - quaternion components
-
-The purpose of this part is to show a simple closed-loop attitude regulation problem.
-
-### ekf_estimation.py
-
-This script simulates a simple 1-axis attitude estimation problem.
-
-It includes:
-- a 1-axis rotational model
-- simulated gyro and sun-sensor-like measurements
-- an EKF for estimating:
-  - angle
-  - angular velocity
-  - gyro bias
-- plots of:
-  - true vs estimated angle
-  - true vs estimated angular velocity
-  - true vs estimated gyro bias
-  - angle estimation error with covariance bounds
-
-The purpose of this part is to show a simple sensor-fusion and estimation problem without making the code too heavy.
-
-## Why the project is split this way
-
-The control simulation is done in 3 axes because attitude control is much more meaningful there, especially with quaternions.
-The estimator is kept to 1 axis on purpose. A full 3-axis estimator would be more realistic, but it would also make the project much larger and less transparent. For this repo, I preferred a smaller implementation that is easy to read and explain.
+## Current status
+- [x] Requirements defined and checked automatically (`docs/requirements.md`)
+- [x] Reaction wheels with torque and momentum limits
+- [x] Sun sensor, magnetometer, gyro (noise + bias random walk)
+- [ ] TRIAD + 3-axis error-state EKF
+- [ ] Monte Carlo runs
+- [ ] Simple orbit (moving reference vectors, eclipse)
+- [ ] Simulink model
 
 ## How to run
 
-Run the control simulation:
+MATLAB:
+```matlab
+cd matlab
+run_adcs
+```
+It prints a PASS/FAIL table for each requirement and saves plots in `plots/`.
+
+Python (original scripts and cross-check):
 ```bash
 python adcs_simulation.py
-```
-
-Run the estimation simulation:
-```bash
 python ekf_estimation.py
+python python_reference/adcs_wheels_sensors.py
 ```
-
-Both scripts save figures in the plots/ directory.
-
-## What this project is meant to show
-
-This repository is mainly a learning and portfolio project. It is meant to show that I took the initiative to experiment with topics that are relevant to entry-level AOCS and GNC work, including:
-- rotational dynamics
-- quaternion kinematics
-- basic feedback control
-- disturbance rejection
-- sensor modelling
-- Extended Kalman Filtering
-- gyro bias estimation
 
 ## Main simplifications
+- Attitude only, no orbit propagation
+- Ideal wheels (no friction, no motor dynamics), no momentum dumping
+- Controller uses the true state for now, sensors are only simulated and logged
+- Fixed reference vectors for sun and magnetic field
+- Disturbance torques are simple sinusoids
 
-This is a deliberately simplified project. In particular:
-
-- orbit propagation is not modelled
-- the control case uses direct torque rather than a detailed actuator model
-- the disturbance torques are simple analytical functions
-- the EKF example is 1-axis rather than full 3-axis
-- environmental models are very basic
-
-These simplifications are intentional. The aim was to build something small, readable, and functional rather than a large unfinished simulator.
-
-## Possible next steps
-
-Some natural extensions would be:
-- reaction wheel or magnetorquer modelling
-- a 3-axis attitude estimator
-- more realistic disturbance models
-- actuator saturation and sensor update-rate effects
-- Monte Carlo runs for sensitivity analysis
-- comparison between different control laws
+## What I am trying to learn
+Rigid-body dynamics, quaternions, PD control, reaction wheels, sensor modelling,
+requirements-driven testing, and (next) attitude determination with an EKF.
