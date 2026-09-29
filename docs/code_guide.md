@@ -70,6 +70,57 @@ estimates a small 3-number rotation error plus the gyro bias (6 states).
 **Eclipse.** No sun means only the magnetometer, and rotation around the
 field line cannot be seen. The filter knows this: its sigma grows in eclipse.
 
+## The Simulink model
+`simulink/adcs_model.slx` is only the control loop: the controller, the two
+wheel limits, the rigid body dynamics and the disturbances. It uses the TRUE
+attitude and rate, there are no sensors or MEKF in it yet.
+- `build_adcs_model.m` creates the model block by block. Read this instead
+  of clicking through the .slx, it is the same thing in text.
+- The MATLAB Function blocks call the same files as the MATLAB loop
+  (`quat_error`, `quat_mult`, `disturbance_torque`), and all the numbers
+  come from `p` (from `adcs_params`) in the workspace.
+- The main difference from `simulate_adcs.m`: Simulink integrates with
+  Integrator blocks and the ode4 solver, the MATLAB loop does it by hand.
+- `run_simulink.m` runs it for 300 s and plots it on top of the MATLAB loop
+  (`plots/simulink_vs_matlab.png`). The wheel momentum should be almost the
+  same in both.
+
+## Glossary
+- **ECI**: inertial frame centred on the Earth, does not rotate. The sun and
+  field directions are known in this frame.
+- **Body frame**: axes fixed to the satellite. Sensors measure in this frame.
+- **Attitude**: the rotation between ECI and body. Stored as a quaternion `q`.
+- **DCM / `A`**: the same rotation as a 3x3 matrix. `A * r_eci = r_body`.
+- **Quaternion**: 4 numbers `[q0; q1; q2; q3]`, scalar first. `q0 = cos(angle/2)`,
+  so the pointing error in degrees is `2*acosd(q0)` of the error quaternion.
+- **Gyro bias**: a slowly changing offset in the gyro reading. If not
+  estimated, integrating the gyro makes the attitude drift.
+- **TRIAD**: attitude from two vector measurements, no memory.
+- **MEKF**: Kalman filter that uses the gyro between measurements and
+  estimates the bias too. Much smoother than TRIAD.
+- **P, sigma, 3-sigma**: the filter's own guess of its error. If the filter
+  is right, the real error stays inside +-3 sigma about 99.7 % of the time.
+- **Eclipse**: the part of the orbit in the Earth's shadow (~36 min of 95).
+- **Wheel momentum `h`**: how fast the wheels spin. It has a maximum, and
+  without magnetorquers the only way to reduce it is to turn back.
+- **Monte Carlo**: run the same simulation many times with random start
+  conditions, to see if it works in general and not just for one case.
+
+## Things to try (to understand it)
+Numbers below are from 300 s runs (`p.t_final = 300`), base case first:
+pointing 0.39 deg, rate 9.7e-4 rad/s, wheels 36 %, bias error 1.7e-4 rad/s.
+- Set `p.P0_bias = 1e-12`: the filter is told it already knows the bias
+  (it thinks it is zero), so it learns it very slowly. Bias error goes to
+  6.0e-4 (REQ-07 fails) and pointing gets worse (0.95 deg).
+- Set `p.Kp = 0.08` and `p.Kd = 0.12` (the first values): pointing gets
+  tighter (0.17 deg) but the rate more than doubles (2.3e-3), because the
+  gyro noise goes straight into the torque.
+- Set `p.h_max = 2e-3`: the first slew uses 91 % of the wheels, REQ-03 fails.
+- Comment out the magnetometer update in `simulate_adcs.m`: in eclipse the
+  filter then has nothing at all and sigma grows on all axes.
+- In `adcs_params.m` change `p.raan` to 96 deg: the orbit no longer goes
+  through the shadow and all the requirements are checked all the time.
+
 ## Useful reading
 The MEKF and TRIAD follow the textbook by Markley and Crassidis,
 *Fundamentals of Spacecraft Attitude Determination and Control* (2014),
