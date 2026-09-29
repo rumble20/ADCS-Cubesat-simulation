@@ -66,7 +66,8 @@ end
 check_requirements(t, err_deg, sqrt(sum(w_log.^2,1)), max(abs(h_log),[],1), sun_err, mag_err);
 
 % --- plots ---
-if ~exist('plots','dir'); mkdir('plots'); end
+% save next to the python plots in the repo root, not inside matlab/
+if ~exist('../plots','dir'); mkdir('../plots'); end
 
 figure('Position',[100 100 800 900]);
 subplot(4,1,1); plot(t, err_deg); grid on;
@@ -80,7 +81,7 @@ subplot(4,1,4); plot(t, h_log'); hold on;
 plot([t(1) t(end)], [p.h_max p.h_max], 'k--');
 plot([t(1) t(end)], [-p.h_max -p.h_max], 'k--'); grid on;
 ylabel('Wheel momentum [N m s]'); xlabel('Time [s]'); legend('x','y','z');
-saveas(gcf, 'plots/matlab_control.png');
+saveas(gcf, '../plots/matlab_control.png');
 
 figure('Position',[100 100 800 700]);
 subplot(3,1,1); plot(t, sun_err); grid on; ylabel('Sun sensor error [deg]');
@@ -88,4 +89,4 @@ title('Simulated sensor errors');
 subplot(3,1,2); plot(t, mag_err); grid on; ylabel('Magnetometer error [deg]');
 subplot(3,1,3); plot(t, gyro_err'); grid on; ylabel('Gyro error [rad/s]');
 xlabel('Time [s]'); legend('x','y','z');
-saveas(gcf, 'plots/matlab_sensors.png');
+saveas(gcf, '../plots/matlab_sensors.png');
