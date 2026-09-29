@@ -112,6 +112,20 @@ Everything up to "First run in real MATLAB" was run in GNU Octave 8.4.
   version, only there to check the MATLAB code while I couldn't run it. It
   still had the old gains and fixed vectors, so now it was just confusing.
 
+## Simulink
+- Only the control loop is in Simulink (wheels, PD, dynamics, disturbances),
+  with the TRUE attitude. Sensors and the MEKF are still MATLAB only.
+- The model is built by `build_adcs_model.m` because git can't diff a .slx.
+  The MATLAB Function blocks call the same .m files as the MATLAB loop.
+- Bug: `run_simulink` crashed with "Index in position 1 exceeds array bounds".
+  To Workspace saved q as 4x1x3001 (because the signal is a column vector),
+  not 3001x4. Fixed with `squeeze(...)'`.
+- Result: the wheel momentum curves are on top of each other (peak 36.52 %
+  vs 36.40 %), and pointing at 30 s is 0.633 vs 0.611 deg. After the slew
+  the MATLAB loop is a bit noisier because it uses the MEKF.
+- The integrator lets the quaternion norm drift a little, so the blocks
+  normalise q before using it.
+
 ## Still to do
 - Rerun the Monte Carlo now that the orbit is in (it still uses 300 s runs).
-- Simulink version of the loop.
+- Put the sensors and the MEKF in the Simulink model too.
