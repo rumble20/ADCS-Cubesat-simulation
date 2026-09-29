@@ -36,6 +36,11 @@ p.sig_gyro = 5e-4;                    % white noise [rad/s]
 p.bias_rw  = 1e-5;                    % bias random walk [rad/s/sqrt(s)]
 p.bias0    = [0.002; -0.0015; 0.001]; % initial gyro bias [rad/s]
 
+% estimator (MEKF)
+p.P0_att  = (5*pi/180)^2;              % initial attitude error variance [rad^2]
+p.P0_bias = (0.005)^2;                 % initial bias error variance [(rad/s)^2]
+p.Q_scale = 1;                        % multiply process noise (tuning knob)
+
 % disturbance torque amplitudes [N m]
 p.dist_amp = [1.5e-5; 2.0e-5; 1.0e-5];
 end
