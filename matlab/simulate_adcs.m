@@ -21,47 +21,73 @@ w_log    = zeros(3,n);
 h_log    = zeros(3,n);
 tau_log  = zeros(3,n);
 gyro_err = zeros(3,n);
-sun_err  = zeros(1,n);
+sun_err  = nan(1,n);     % NaN in eclipse
 mag_err  = zeros(1,n);
-triad_err = zeros(1,n);
-est_err  = zeros(3,n);    % attitude estimation error [deg], per axis
-est_sig  = zeros(3,n);    % 1-sigma from the filter [deg]
-bias_err = zeros(3,n);    % bias estimation error [rad/s]
+triad_err = nan(1,n);
+est_err  = nan(3,n);    % attitude estimation error [deg], per axis
+est_sig  = nan(3,n);    % 1-sigma from the filter [deg]
+bias_err = nan(3,n);
+ecl_log  = false(1,n);
+started  = false;         % becomes true when the MEKF has been started
+t_start  = NaN;    % bias estimation error [rad/s]
 
 for k = 1:n
+    % --- orbit and environment ---
+    r_pos = orbit_position(t(k), p);
+    p.r_sun = sun_vector_eci(t(k), p);
+    p.r_mag = mag_field_eci(r_pos, t(k), p);
+    dark = in_eclipse(r_pos, p.r_sun, p);
+    ecl_log(k) = dark;
+
     % --- sensors (using the true state at this step) ---
     A = quat_to_dcm(q);
-    sun = sun_sensor(q, p);
     mag = magnetometer(q, p);
     [gyro, bias] = gyro_model(w, bias, p);
-
-    % --- attitude determination (TRIAD, sun as primary vector) ---
-    q_triad = triad(sun, mag, p.r_sun, p.r_mag);
+    if ~dark
+        sun = sun_sensor(q, p);
+    end
 
     % --- attitude estimation (MEKF) ---
-    if k == 1
-        % start the filter from TRIAD, bias unknown
-        q_est = q_triad;
-        b_est = zeros(3,1);
-        P = blkdiag(p.P0_att*eye(3), p.P0_bias*eye(3));
+    if ~started
+        if ~dark
+            % start the filter from TRIAD (sun as primary vector), bias unknown
+            q_est = triad(sun, mag, p.r_sun, p.r_mag);
+            b_est = zeros(3,1);
+            P = blkdiag(p.P0_att*eye(3), p.P0_bias*eye(3));
+            started = true;
+            t_start = t(k);
+        end
     else
         [q_est, P] = mekf_predict(q_est, b_est, P, gyro_prev, p);
-        [q_est, b_est, P] = mekf_update(q_est, b_est, P, sun, p.r_sun, p.sig_sun);
+        if ~dark
+            [q_est, b_est, P] = mekf_update(q_est, b_est, P, sun, p.r_sun, p.sig_sun);
+        end
         [q_est, b_est, P] = mekf_update(q_est, b_est, P, mag, p.r_mag, p.sig_mag);
     end
     gyro_prev = gyro;
 
-    % --- control (uses the ESTIMATED attitude and rate now) ---
-    qe_est = quat_error(p.q_ref, q_est);
-    w_est  = gyro - b_est;
+    % --- control (uses the ESTIMATED attitude and rate) ---
+    if ~started
+        % no attitude yet (starting in eclipse): only damp the rates
+        tau_cmd = -p.Kd * gyro;
+        qe_est = [1; 0; 0; 0];
+    else
+        qe_est = quat_error(p.q_ref, q_est);
+    end
+    w_est = gyro;
+    if started
+        w_est = gyro - b_est;
+    end
     % PD written as "track a commanded rate". The commanded rate is capped at
     % p.w_max, otherwise big slews spin up the wheels too much (see NOTES.md).
     % For small errors this is exactly the same as tau = -Kp*qv - Kd*w.
-    w_cmd = -(p.Kp / p.Kd) * qe_est(2:4);
-    if norm(w_cmd) > p.w_max
-        w_cmd = w_cmd / norm(w_cmd) * p.w_max;
+    if started
+        w_cmd = -(p.Kp / p.Kd) * qe_est(2:4);
+        if norm(w_cmd) > p.w_max
+            w_cmd = w_cmd / norm(w_cmd) * p.w_max;
+        end
+        tau_cmd = -p.Kd * (w_est - w_cmd);
     end
-    tau_cmd = -p.Kd * (w_est - w_cmd);
 
     % --- actuator ---
     [tau_body, h_next] = reaction_wheels(tau_cmd, h, p);
@@ -75,17 +101,21 @@ for k = 1:n
     h_log(:,k)    = h;
     tau_log(:,k)  = tau_body;
     gyro_err(:,k) = gyro - w;
-    sun_err(k)    = acosd(min(1, sun' * (A * p.r_sun)));
     mag_err(k)    = acosd(min(1, mag' * (A * p.r_mag)));
-    qe_t = quat_error(q, q_triad);
-    triad_err(k)  = 2 * acosd(min(1, qe_t(1)));
-    dq_est = quat_error(q_est, q);          % true = est * dq
-    est_err(:,k)  = 2 * dq_est(2:4) * 180/pi;
-    est_sig(:,k)  = sqrt(diag(P(1:3,1:3))) * 180/pi;
-    bias_err(:,k) = bias - b_est;
+    if ~dark
+        sun_err(k) = acosd(min(1, sun' * (A * p.r_sun)));
+        qe_t = quat_error(q, triad(sun, mag, p.r_sun, p.r_mag));
+        triad_err(k) = 2 * acosd(min(1, qe_t(1)));
+    end
+    if started
+        dq_est = quat_error(q_est, q);          % true = est * dq
+        est_err(:,k)  = 2 * dq_est(2:4) * 180/pi;
+        est_sig(:,k)  = sqrt(diag(P(1:3,1:3))) * 180/pi;
+        bias_err(:,k) = bias - b_est;
+    end
 
     % --- dynamics (Euler for the rate, midpoint rate for the quaternion) ---
-    tau_dist = disturbance_torque(t(k), p);
+    tau_dist = disturbance_torque(t(k), p) + gravity_gradient(q, r_pos, p);
     w_dot = p.I \ ( -cross(w, p.I*w + h) + tau_body + tau_dist );
     w_next = w + p.dt * w_dot;
     w_mid = 0.5 * (w + w_next);
@@ -112,4 +142,6 @@ res.w_norm   = sqrt(sum(w_log.^2,1));
 res.h_abs    = max(abs(h_log),[],1);
 res.est_norm = sqrt(sum(est_err.^2,1));
 res.bias_err_norm = sqrt(sum(bias_err.^2,1));
+res.eclipse  = ecl_log;
+res.t_start  = t_start;
 end

@@ -12,10 +12,15 @@ tau_log = res.tau_log; gyro_err = res.gyro_err; sun_err = res.sun_err;
 mag_err = res.mag_err; triad_err = res.triad_err; est_err = res.est_err;
 est_sig = res.est_sig; bias_err = res.bias_err;
 
-fprintf('TRIAD attitude error: RMS %.3f deg, max %.3f deg\n', sqrt(mean(triad_err.^2)), max(triad_err));
-fprintf('MEKF attitude error: RMS %.3f deg, max after 60 s %.3f deg\n', sqrt(mean(res.est_norm.^2)), max(res.est_norm(t>=60)));
+ok = ~isnan(triad_err);
+fprintf('TRIAD attitude error (sunlit only): RMS %.3f deg, max %.3f deg\n', sqrt(mean(triad_err(ok).^2)), max(triad_err(ok)));
+fprintf('Time in eclipse: %.1f min of %.1f min\n', sum(res.eclipse)*p.dt/60, t(end)/60);
+ok = ~isnan(res.est_norm);
+fprintf('MEKF attitude error: RMS %.3f deg, max after 60 s %.3f deg\n', sqrt(mean(res.est_norm(ok).^2)), max(res.est_norm(t>=60)));
+fprintf('MEKF max error in sunlight %.3f deg, in eclipse %.3f deg (after 60 s)\n', max(res.est_norm(t>=60 & ~res.eclipse)), max(res.est_norm(t>=60 & res.eclipse)));
 fprintf('Final bias error: %s rad/s\n', mat2str(bias_err(:,end)', 3));
-inside = mean(abs(est_err(:)) < 3*est_sig(:)) * 100;
+ok = ~isnan(est_err(:));
+inside = mean(abs(est_err(ok)) < 3*est_sig(ok)) * 100;
 fprintf('Samples inside 3-sigma: %.1f %%\n', inside);
 
 check_requirements(res, p);

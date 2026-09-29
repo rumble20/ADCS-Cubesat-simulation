@@ -7,7 +7,7 @@ p.I = diag([0.010 0.012 0.018]);      % inertia [kg m^2]
 
 % simulation
 p.dt      = 0.1;                      % [s]
-p.t_final = 300;                      % [s]
+p.t_final = 5700;                     % [s] about one orbit (94.6 min)
 p.seed    = 1;                        % so the noise is repeatable
 
 % controller
@@ -26,10 +26,16 @@ p.q0 = q0 / norm(q0);
 p.w0 = [0.035; -0.028; 0.022];        % [rad/s]
 p.q_ref = [1; 0; 0; 0];
 
-% fixed reference vectors in the inertial frame (no orbit yet)
-p.r_sun = [1; 0; 0];
-r_mag   = [0.3; 0.5; 0.8];
-p.r_mag = r_mag / norm(r_mag);
+% orbit (circular, sun-synchronous-ish inclination)
+p.R_earth = 6378.137e3;               % [m]
+p.mu      = 3.986004418e14;           % [m^3/s^2]
+p.w_earth = 7.2921159e-5;             % Earth rotation [rad/s]
+p.alt     = 500e3;                    % [m]
+p.inc     = 97.4 * pi/180;            % [rad]
+p.raan    = 186 * pi/180;             % about the sun right ascension at the epoch,
+                                      % so the orbit goes through the shadow
+p.u0      = 0;                        % starting point on the orbit [rad]
+p.days_j2000 = 9768;                  % epoch: 29 Sep 2026, in days since J2000
 
 % sensor noise (1 sigma)
 p.sig_sun  = 0.005;                   % per component, unit vector [-]

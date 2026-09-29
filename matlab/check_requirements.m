@@ -14,7 +14,8 @@ late  = res.t >= 120;
 v(1) = max(res.err_deg(after));                    % deg
 v(2) = max(res.w_norm(after));                     % rad/s
 v(3) = max(res.h_abs) / p.h_max * 100;             % % of wheel capacity
-v(4) = sqrt(mean(res.sun_err.^2));                 % deg
+sun_ok = ~isnan(res.sun_err);                      % no sun data in eclipse
+v(4) = sqrt(mean(res.sun_err(sun_ok).^2));         % deg
 v(5) = sqrt(mean(res.mag_err.^2));                 % deg
 v(6) = max(res.est_norm(after));                   % deg
 v(7) = max(res.bias_err_norm(late));               % rad/s
