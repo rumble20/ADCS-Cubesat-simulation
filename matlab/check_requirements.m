@@ -1,14 +1,26 @@
 function [all_ok, results] = check_requirements(res, p, verbose)
 % Compares one simulation run against docs/requirements.md
 % res is a struct with the logs from run_adcs (see the end of run_adcs.m).
-% Pointing, rate and knowledge are only checked for t >= 60 s.
+% Pointing, rate and knowledge are only checked when the satellite is in
+% the sun and has seen the sun for at least 60 s (at the start and after
+% every eclipse). In eclipse only the magnetometer works and the attitude
+% drifts, so those numbers are printed separately just to look at.
 % Set verbose = false to skip printing (used by the Monte Carlo).
 
 if nargin < 3
     verbose = true;
 end
 
-after = res.t >= 60;
+% time since the sun was last seen (starts counting at t = 0 too)
+sun_time = zeros(size(res.t));
+for k = 2:length(res.t)
+    if res.eclipse(k)
+        sun_time(k) = 0;
+    else
+        sun_time(k) = sun_time(k-1) + (res.t(k) - res.t(k-1));
+    end
+end
+after = sun_time >= 60 & ~res.eclipse;
 late  = res.t >= 120;
 
 v(1) = max(res.err_deg(after));                    % deg
@@ -28,12 +40,13 @@ if ~verbose
     return
 end
 
-names = {'Pointing error after 60 s', 'Body rate after 60 s', 'Peak wheel momentum', ...
+names = {'Pointing error (sunlit)', 'Body rate (sunlit)', 'Peak wheel momentum', ...
          'Sun sensor error (RMS)', 'Magnetometer error (RMS)', ...
-         'Attitude knowledge after 60 s', 'Bias estimate error after 120 s'};
+         'Attitude knowledge (sunlit)', 'Bias estimate error after 120 s'};
 units = {'deg', 'rad/s', '% cap', 'deg', 'deg', 'deg', 'rad/s'};
 
 fprintf('\n---- Requirements check ----\n');
+fprintf('(REQ-01, 02, 06 only in sunlight, 60 s after the sun is visible)\n');
 for i = 1:length(v)
     if results(i)
         s = 'PASS';
@@ -41,6 +54,10 @@ for i = 1:length(v)
         s = 'FAIL';
     end
     fprintf('REQ-%02d  %-32s %10.4g %-6s (req < %g)  %s\n', i, names{i}, v(i), units{i}, lim(i), s);
+end
+if any(res.eclipse)
+    fprintf('Just for info, in eclipse: max pointing error %.2f deg, max knowledge error %.2f deg\n', ...
+        max(res.err_deg(res.eclipse)), max(res.est_norm(res.eclipse)));
 end
 if all_ok
     fprintf('Overall: PASS\n');
