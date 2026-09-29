@@ -13,6 +13,8 @@ p.seed    = 1;                        % so the noise is repeatable
 % controller
 p.Kp = 0.01;     % was 0.08/0.12 (first python version), too aggressive once
 p.Kd = 0.03;     % the gyro noise goes through the controller. See NOTES.md
+p.w_max = 0.1;   % max commanded slew rate [rad/s], from the wheel momentum budget:
+                 % 0.018 kg m^2 * 0.1 rad/s = 1.8e-3 N m s (36 % of h_max)
 
 % reaction wheels (one per axis, ideal, no friction)
 p.tau_max = 1e-3;                     % max wheel torque [N m]

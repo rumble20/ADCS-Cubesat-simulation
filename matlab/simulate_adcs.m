@@ -54,7 +54,14 @@ for k = 1:n
     % --- control (uses the ESTIMATED attitude and rate now) ---
     qe_est = quat_error(p.q_ref, q_est);
     w_est  = gyro - b_est;
-    tau_cmd = -p.Kp * qe_est(2:4) - p.Kd * w_est;
+    % PD written as "track a commanded rate". The commanded rate is capped at
+    % p.w_max, otherwise big slews spin up the wheels too much (see NOTES.md).
+    % For small errors this is exactly the same as tau = -Kp*qv - Kd*w.
+    w_cmd = -(p.Kp / p.Kd) * qe_est(2:4);
+    if norm(w_cmd) > p.w_max
+        w_cmd = w_cmd / norm(w_cmd) * p.w_max;
+    end
+    tau_cmd = -p.Kd * (w_est - w_cmd);
 
     % --- actuator ---
     [tau_body, h_next] = reaction_wheels(tau_cmd, h, p);
